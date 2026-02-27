@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, ArrowLeft } from "lucide-react";
+import { Shield, ArrowLeft, BarChart3 } from "lucide-react";
 import { LabAnalysisResponse } from "@/types/biomarker";
 import { BiomarkerCard } from "@/components/BiomarkerCard";
 import { Switch } from "@/components/ui/switch";
@@ -13,6 +13,7 @@ interface DashboardProps {
 
 export function Dashboard({ data, onBack }: DashboardProps) {
   const [calmMode, setCalmMode] = useState(false);
+  const [comparative, setComparative] = useState(false);
 
   const flagged = data.biomarkers.filter((b) => b.status !== "normal");
   const displayed = calmMode ? flagged : data.biomarkers;
@@ -21,14 +22,19 @@ export function Dashboard({ data, onBack }: DashboardProps) {
     "Most of your results are within a healthy range. The items shown below just need a little attention — nothing to worry about. Your doctor can help with simple next steps.";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b border-border">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
           <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 text-muted-foreground">
             <ArrowLeft className="h-4 w-4" /> New analysis
           </Button>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5">
+            <Label htmlFor="comparative" className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1.5">
+              <BarChart3 className="h-4 w-4" /> Comparative
+            </Label>
+            <Switch id="comparative" checked={comparative} onCheckedChange={setComparative} />
+            <div className="w-px h-5 bg-border" />
             <Label htmlFor="calm" className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1.5">
               <Shield className="h-4 w-4" /> Calm Mode
             </Label>
@@ -37,7 +43,7 @@ export function Dashboard({ data, onBack }: DashboardProps) {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-4 py-8 flex-1">
         {/* AI Insight Header */}
         <div
           className={`rounded-2xl p-6 md:p-8 mb-8 transition-colors duration-300 ${
@@ -61,7 +67,7 @@ export function Dashboard({ data, onBack }: DashboardProps) {
         {/* Biomarker Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in">
           {displayed.map((b) => (
-            <BiomarkerCard key={b.name} biomarker={b} calm={calmMode} />
+            <BiomarkerCard key={b.name} biomarker={b} calm={calmMode} comparative={comparative} />
           ))}
         </div>
 
@@ -72,6 +78,13 @@ export function Dashboard({ data, onBack }: DashboardProps) {
           </div>
         )}
       </main>
+
+      {/* Disclaimer Footer */}
+      <footer className="border-t border-border bg-muted/30 py-4 mt-8">
+        <p className="text-center text-xs text-muted-foreground max-w-2xl mx-auto px-4">
+          This AI summary is for informational purposes and should be discussed with a healthcare professional.
+        </p>
+      </footer>
     </div>
   );
 }
