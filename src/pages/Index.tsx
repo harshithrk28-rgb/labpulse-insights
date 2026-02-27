@@ -2,8 +2,9 @@ import { useState } from "react";
 import { UploadScreen } from "@/components/UploadScreen";
 import { ProcessingState } from "@/components/ProcessingState";
 import { Dashboard } from "@/components/Dashboard";
-import { mockLabResults } from "@/data/mockLabResults";
 import { LabAnalysisResponse } from "@/types/biomarker";
+import { analyzePdf, analyzeText } from "@/services/api";
+import { toast } from "sonner";
 
 type AppState = "upload" | "processing" | "dashboard";
 
@@ -14,12 +15,19 @@ const Index = () => {
   const handleSubmit = async (type: "pdf" | "text", data: File | string) => {
     setState("processing");
 
-    // Simulate API call — in production this would POST to /api/analyze/pdf or /api/analyze/text
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response =
+        type === "pdf"
+          ? await analyzePdf(data as File)
+          : await analyzeText(data as string);
 
-    // Return mock data for now
-    setResults(mockLabResults);
-    setState("dashboard");
+      setResults(response);
+      setState("dashboard");
+    } catch (err) {
+      console.error("Analysis failed:", err);
+      toast.error("Analysis failed. Please try again.");
+      setState("upload");
+    }
   };
 
   const handleBack = () => {
